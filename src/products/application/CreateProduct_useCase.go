@@ -13,6 +13,10 @@ func NewCreateProduct(db domain.IProduct) *CreateProduct {
 	return &CreateProduct{db: db}
 }
 
-func (cp *CreateProduct) Execute(NewProduct *entities.Product){
-	cp.db.Save(NewProduct)
+func (cp *CreateProduct) Execute(NewProduct *entities.Product) error{
+	err :=cp.db.Save(NewProduct)
+	if err != nil {
+		return err
+	}
+	return nil
 }

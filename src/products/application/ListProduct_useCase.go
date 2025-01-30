@@ -14,7 +14,10 @@ func NewViewProduct(db domain.IProduct) *ViewProduct {
 	return &ViewProduct{db: db}
 }
 
-func (vp *ViewProduct) Execute() ([]entities.Product) {
-    products := vp.db.GetAll()
-    return products
+func (vp *ViewProduct) Execute() ([]entities.Product,error) {
+    res, err := vp.db.GetAll()
+	if err != nil {
+		return res,err
+	}
+	return res,nil
 }

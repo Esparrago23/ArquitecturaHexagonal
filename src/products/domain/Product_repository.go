@@ -5,8 +5,8 @@ import (
 )
 
 type IProduct interface {
-	Save(product *entities.Product)
-	GetAll() ([]entities.Product)
-	Delete(id int)
-	Edit(id int,updatedProduct *entities.Product)
+	Save(product *entities.Product) error
+	GetAll() ([]entities.Product, error)
+	Delete(id int) error
+	Edit(id int,updatedProduct *entities.Product) error
 }
