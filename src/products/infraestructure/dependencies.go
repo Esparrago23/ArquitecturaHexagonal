@@ -17,16 +17,19 @@ func Init(router *gin.Engine) {
 	viewProductService := application.NewViewProduct(ps)
 	EditProductService := application.NewEditProduct(ps)
 	deleteProductService := application.NewDeleteProduct(ps)
+	CheckMissingProductsService := application.NewMissingProduct(ps)
 
 	createProductController := controllers.NewCreateProductController(*createProductService)
 	viewProductController := controllers.NewListProductController(*viewProductService)
 	EditProductController := controllers.NewEditProductController(*EditProductService)
 	deleteProductController := controllers.NewDeleteProductController(*deleteProductService)
+	CheckMissingProductController := controllers.NewMissingProductsController(*CheckMissingProductsService)
 
 	ProductsRoutes(router, ProductHandlers{
 		Create: createProductController,
 		Get: viewProductController,
 		Edit: EditProductController,
 		Delete: deleteProductController,
+		Missing: CheckMissingProductController,
 	})
 }

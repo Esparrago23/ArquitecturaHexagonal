@@ -11,6 +11,7 @@ type ProductHandlers struct {
 	Get    *controllers.ListProductController
 	Edit *controllers.EditProductController
 	Delete *controllers.DeleteProductController
+	Missing *controllers.MissingProductsController
 }
 func ProductsRoutes(router *gin.Engine,handlers ProductHandlers){
 	productsGroup := router.Group("/products")
@@ -19,5 +20,6 @@ func ProductsRoutes(router *gin.Engine,handlers ProductHandlers){
         productsGroup.GET("/", handlers.Get.Execute)
         productsGroup.PUT("/:id", handlers.Edit.Execute)
         productsGroup.DELETE("/:id", handlers.Delete.Execute)
+		productsGroup.GET("/missing", handlers.Missing.Execute)
     }
 }
