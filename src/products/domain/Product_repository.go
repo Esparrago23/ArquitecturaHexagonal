@@ -9,4 +9,7 @@ type IProduct interface {
 	GetAll() ([]entities.Product, error)
 	Delete(id int) error
 	Edit(id int,updatedProduct *entities.Product) error
+	CheckMissingProducts()([]entities.Product, error)
+	CheckNewProducts()([]entities.Product, error)
+
 }

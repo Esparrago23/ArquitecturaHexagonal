@@ -5,6 +5,7 @@ import (
 	"demo/src/products/domain/entities"
 	"fmt"
 	"log"
+    "time"
 )
 
 type MySQL struct {
@@ -21,7 +22,7 @@ func NewMySQL() *MySQL {
 }
 
 func (mysql *MySQL) Save(product *entities.Product) error {
-	_, err := mysql.conn.DB.Exec("INSERT INTO products (name, price) VALUES (?, ?)", product.Name, product.Price)
+	_, err := mysql.conn.DB.Exec("INSERT INTO products (name, price, quantity) VALUES (?, ?, ?)", product.Name, product.Price, product.Quantity)
 	if err != nil {
 		log.Printf("Error al insertar un producto: %v", err)
 		return err
@@ -32,7 +33,31 @@ func (mysql *MySQL) Save(product *entities.Product) error {
 
 func (mysql *MySQL) GetAll() ([]entities.Product, error) {
 	fmt.Print("[MySQL] - Lista de productos")
-	rows, err := mysql.conn.DB.Query("SELECT id, name, price FROM products")
+	rows, err := mysql.conn.DB.Query("SELECT id, name, price, quantity, created_at FROM products")
+    if err != nil {
+        log.Fatal(err)
+    }
+    defer rows.Close()
+
+    var products []entities.Product
+    for rows.Next() {
+        var createdAtStr string
+        var product entities.Product
+        if err := rows.Scan(&product.Id, &product.Name, &product.Price, &product.Quantity, &createdAtStr); err != nil {
+            log.Fatal(err)
+        }
+        product.Created_at, err = time.Parse("2006-01-02 15:04:05", createdAtStr)
+    if err != nil {
+        log.Fatal(err)
+    }
+        products = append(products, product)
+    }
+    return products,nil
+	
+}
+func (mysql *MySQL) CheckMissingProducts() ([]entities.Product, error) {
+	fmt.Print("[MySQL] - Lista de productos")
+	rows, err := mysql.conn.DB.Query("SELECT id, name, price, quantity FROM products where quantity < 5")
     if err != nil {
         log.Fatal(err)
     }
@@ -41,7 +66,7 @@ func (mysql *MySQL) GetAll() ([]entities.Product, error) {
     var products []entities.Product
     for rows.Next() {
         var product entities.Product
-        if err := rows.Scan(&product.Id, &product.Name, &product.Price); err != nil {
+        if err := rows.Scan(&product.Id, &product.Name, &product.Price, &product.Quantity); err != nil {
             log.Fatal(err)
         }
         products = append(products, product)
@@ -51,7 +76,7 @@ func (mysql *MySQL) GetAll() ([]entities.Product, error) {
 }
 
 func (mysql *MySQL) Edit(id int,updatedProduct *entities.Product) error {
-    _, err := mysql.conn.DB.Exec("UPDATE products SET name = ?, price = ? WHERE id = ?", updatedProduct.Name, updatedProduct.Price, id)
+    _, err := mysql.conn.DB.Exec("UPDATE products SET name = ?, price = ?, quantity = ? WHERE id = ?", updatedProduct.Name, updatedProduct.Price, updatedProduct.Quantity, id)
     if err != nil {
         log.Fatal(err)
     }
@@ -65,4 +90,30 @@ func (mysql *MySQL) Delete(id int) error {
     }
     fmt.Print("[MySQL] - Producto eliminado con id:",id)
 	return nil
+}
+
+//long polling
+func (mysql *MySQL) CheckNewProducts() ([]entities.Product, error) {
+	fmt.Print("[MySQL] - Lista de nuevos productos")
+	rows, err := mysql.conn.DB.Query("SELECT id, name, price, quantity, created_at FROM products WHERE created_at >= DATE_SUB(NOW(), INTERVAL 2 WEEK)ORDER BY created_at DESC")
+    if err != nil {
+        log.Fatal(err)
+    }
+    defer rows.Close()
+
+    var products []entities.Product
+    for rows.Next() {
+        var createdAtStr string
+        var product entities.Product
+        if err := rows.Scan(&product.Id, &product.Name, &product.Price, &product.Quantity, &createdAtStr); err != nil {
+            log.Fatal(err)
+        }
+       product.Created_at, err = time.Parse("2006-01-02 15:04:05", createdAtStr)
+    if err != nil {
+        log.Fatal(err)
+    }
+        products = append(products, product)
+    }
+    return products,nil
+	
 }

@@ -5,7 +5,7 @@ import (
 	"demo/src/products/domain/entities"
 	"net/http"
 	"strconv"
-
+    "time"
 	"github.com/gin-gonic/gin"
 )
 
@@ -21,16 +21,29 @@ func (cp_c *EditProductController) Execute(c *gin.Context) {
     var product struct {
         Name  string  `json:"name"`
         Price float32 `json:"price"`
+        Quantity int32   `json:"quantity"`
+        Created_at     time.Time `json:"created_at"`
     }
     if err := c.ShouldBindJSON(&product); err != nil {
         c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
         return
     }
+    if product.Price < 0 {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "Price must be zero or greater"})
+        return
+    }
+    if product.Quantity < 0 {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "Quantity must be zero or greater"})
+        return
+    }
+
 
     productID := c.Param("id")
     updatedProduct := entities.Product{
         Name:  product.Name,
         Price: product.Price,
+        Quantity: product.Quantity,
+        Created_at: product.Created_at,
     }
 
     id, err := strconv.Atoi(productID)
