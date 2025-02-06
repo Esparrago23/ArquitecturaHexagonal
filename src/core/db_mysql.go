@@ -23,7 +23,7 @@ func GetDBPool() *Conn_MySQL {
 		log.Fatalf("Error al cargar el archivo .env: %v",err)
 	}
 
-	dbHost := os.Getenv("DB_host")
+	dbHost := os.Getenv("DB_HOST")
 	dbUser := os.Getenv("DB_USER")
 	dbpass := os.Getenv("DB_PASS")
 	dbSchema := os.Getenv("DB_SCHEMA")
@@ -35,7 +35,7 @@ func GetDBPool() *Conn_MySQL {
 	if err != nil{
 		error = fmt.Sprintf("error al abrir la base de datos: %w",err)
 	}
-
+	fmt.Println("Conexión establecida correctamente")
 	db.SetMaxOpenConns(10)
 
 	if err:= db.Ping(); err!=nil {
